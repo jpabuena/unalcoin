@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from time import time
 from json import dumps
 from hashlib import sha256
+from typing import Any
 
 
 @dataclass
@@ -11,11 +12,11 @@ class Block:
     """
 
     index: int
-    transactions: list
+    transactions: list[Any]
     previous_hash: str
 
     # nonce para el minado del bloque
-    nonce: int = 0
+    nonce: int = 0 # TODO: implementar el minado del bloque
 
     # fecha y hora de la creacion del bloque en formato UNIX
     timestamp: float = field(default_factory=time)
@@ -44,4 +45,3 @@ class Block:
         )
 
         return sha256(block_content.encode()).hexdigest()
-
