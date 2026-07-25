@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from block import Block
-from errors import AddBlockError, GenesisBlockExistentError
+from exceptions import BlockchainError
 
 
 @dataclass
@@ -39,7 +39,7 @@ class Blockchain:
             # agregamos el bloque directamente a la cadena
             self.chain.append(genesis_block)
         else:
-            raise GenesisBlockExistentError(
+            raise BlockchainError(
                 "Error al crear el bloque genesis", "El bloque genesis ya fue creado"
             )
 
@@ -48,12 +48,12 @@ class Blockchain:
             if self.verify_block(block):
                 self.chain.append(block)
             else:
-                raise AddBlockError(
+                raise BlockchainError(
                     "Error al agregar el bloque",
-                    "El bloque es invalido y no puede ser agregado a la cadena"
+                    "El bloque es invalido y no puede ser agregado a la cadena",
                 )
         else:
-            raise AddBlockError(
+            raise BlockchainError(
                 "Error al agregar el bloque",
                 "No puede agregarse el nuevo bloque ya que no existe el bloque genesis",
             )
@@ -85,21 +85,22 @@ class Blockchain:
         Metodo que verifica la integridad de la cadena, esto se refiere a mirar si cada bloque es
         correcto y ademas cumple con la propiedad de estar enlazado criptogrficamente con su bloque previo
         """
-        for i in range(self.length-1,0,-1):
+        for i in range(self.length - 1, 0, -1):
             # se debe hacer una verificación de cada bloque, ¿cuando un bloque es correcto?
             current_block = self.chain[i]
-            previous_block = self.chain[i-1]
+            previous_block = self.chain[i - 1]
 
             # verificar ambos bloques
-            if not self.verify_block(current_block) or not self.verify_block(previous_block):
+            if not self.verify_block(current_block) or not self.verify_block(
+                previous_block
+            ):
                 # esto puede pasar? xD
                 # deberiamos retornar False o lanzar una excepcion?
                 return False
-            
+
             # verificar si estan enlazados criptograficamente
             if current_block.previous_hash != previous_block.hash:
                 # retornar False o lanzar excepcion?
                 return False
-            
-        return True
 
+        return True

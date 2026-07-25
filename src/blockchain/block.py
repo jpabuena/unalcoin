@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from time import time
 from json import dumps
 from hashlib import sha256
-from typing import Any
+from transaction import Transaction
 
 
 @dataclass
@@ -12,18 +12,17 @@ class Block:
     """
 
     index: int
-    transactions: list[Any]
+    transactions: list[Transaction]
     previous_hash: str
 
     # nonce para el minado del bloque
-    nonce: int = 0 # TODO: implementar el minado del bloque
+    nonce: int = 0  # TODO: implementar el minado del bloque
 
     # fecha y hora de la creacion del bloque en formato UNIX
     timestamp: float = field(default_factory=time)
 
-    # despues de ser instanciado el bloque calculamos su hash
-    def __post_init__(self):
-        self.hash = self.calculate_hash()
+    # el hash es provisional hasta que el bloque es minado completamente
+    hash: str | None = field(init=False, default=None)
 
     def calculate_hash(self) -> str:
         """
