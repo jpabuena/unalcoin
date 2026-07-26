@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from time import time
-
 from exceptions import TransactionError
 
 
@@ -11,16 +10,17 @@ class Transaction:
     inmutable despues de su creacion
     """
 
-    # sender y receiver seria la identificacion de los usuarios
-    # es decir sus claves publicas
+    # sender y recipient serian la identificacion de los usuarios
+    # es decir sus claves publicas (o una representacion)
     sender: str
-    receiver: str
+    recipient: str
     amount: float
+    nonce: int
 
-    # que tipo de dato seria la firma ?
-    signature: str
+    # la firma sera guardada en hexadecimal
+    signature: str | None = field(default=None, init=False)
 
-    timestamp: float = field(default_factory=time)
+    timestamp: float = field(default_factory=time, init=False)
 
     def __post_init__(self):
         # verificar que el amount sea positivo
@@ -29,13 +29,15 @@ class Transaction:
                 "Error en la creacion de la transaccion", "El valor debe ser positivo"
             )
 
-        # verificar que el sender sea distinto al receiver
-        if self.sender == self.receiver:
+        # verificar que el sender sea distinto al recipient
+        if self.sender == self.recipient:
             raise TransactionError(
                 "Error en la creacion de la transaccion",
                 "El emisor debe ser distinto al receptor de la transaccion",
             )
 
-        # verificar que la firma no sea una cadena vacia
-        if not self.signature:
-            raise TransactionError("Error al crear la transaccion", "Firma no valida")
+    def sign(self, private_key):
+        """
+        Metodo para firmar la transaccion con una clave privada
+        """
+        pass

@@ -1,0 +1,65 @@
+from dataclasses import dataclass, field, asdict
+from transaction import Transaction
+from block import Block
+from json import dumps
+from hashlib import sha256
+from time import time
+from crypto.hash import calculate_hash
+
+
+@dataclass
+class BlockBuilder:
+    """
+    Clase auxiliar que se encarga de crear un bloque inmutable para
+    agregar a la cadena. Esta permite agregar transacciones.
+    """
+
+    index: int
+    transactions: list[Transaction]
+    previous_hash: str
+
+    # el timestamp corresponde al momento de creación del bloque
+    timestamp: float = field(default_factory=time, init=False)
+
+    # nonce para el minado del bloque
+    nonce: int = field(default=0, init=False)
+
+    # el hash es provisional hasta que el bloque es minado completamente
+    hash: str | None = field(default=None, init=False)
+
+    def add_transaction(self, tx: Transaction):
+        self.transactions.append(
+            tx
+        )  # TODO: validar la firma antes de agregar la transaccion
+
+    def mine(self, difficulty: int):
+        """
+        Metodo de "Proof Of Work" para minar el bloque.
+
+        Se buscara encontrar mediante distintos nonce aquel hash que empieze
+        con tantos 0's como "difficulty" lo establezca. Es decir, si difficulty
+        es 4 el nonce que "mina" el bloque es aquel que produce un hash de la
+        forma "0000...".
+        """
+
+        target = "0" * difficulty
+
+        # como vamos a minar el bloque le asignamos a hash una cadena vacia
+        # para poder comparar debido a que esta es None en la creacion del
+        # builder
+        self.hash = ""
+        while not self.hash.startswith(target):
+            # le sumamos uno al nonce y recalculamos el hash
+            self.nonce += 1
+
+            self.hash = calculate_hash(asdict(self))
+
+        # una vez se mina el bloque se procede a crear el mismo inmutable
+        return Block(
+            self.index,
+            tuple(self.transactions),
+            self.previous_hash,
+            self.nonce,
+            self.timestamp,
+            self.hash,
+        )

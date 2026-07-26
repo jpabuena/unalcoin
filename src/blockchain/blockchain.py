@@ -1,6 +1,9 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from block import Block
 from exceptions import BlockchainError
+from time import time
+from block_builder import BlockBuilder
+from crypto.hash import calculate_hash
 
 
 @dataclass
@@ -9,7 +12,8 @@ class Blockchain:
     Clase que representa la cadena de bloques
     """
 
-    chain: list[Block] = []
+    difficulty: int
+    chain: list[Block] = field(default=[], init=False)
 
     @property
     def length(self) -> int:
@@ -32,12 +36,16 @@ class Blockchain:
         de ello
         """
         if not self.length:
-            genesis_block = Block(
-                0, [], "0"
-            )  # TODO: hay que minar los bloques, este tambien
+            # crear el builder del bloque y minarlo
+            genesis_block = BlockBuilder(
+                0, [], "0",
+            )
+
+            # minamos el bloque
+            mined_genesis_block = genesis_block.mine(self.difficulty)
 
             # agregamos el bloque directamente a la cadena
-            self.chain.append(genesis_block)
+            self.chain.append(mined_genesis_block)
         else:
             raise BlockchainError(
                 "Error al crear el bloque genesis", "El bloque genesis ya fue creado"
@@ -65,11 +73,13 @@ class Blockchain:
         """
 
         # primero verificar que el hash del bloque corresponda a este mismo
-        block_hash = block.calculate_hash()
+        block_hash = calculate_hash(asdict(block))
         if block_hash != block.hash:
             return False
 
-        # TODO: verificar que el hash cumpla con la dificultad de minado
+        # verificar que el hash cumpla con la dificultad de minado
+        if not block_hash.startswith("0" * self.difficulty):
+            return False
 
         # validar la integridad del bloque respecto a la cadena, es decir respecto a su bloque
         # anterior, solo verificamos para los nuevos bloques, el bloque genesis no tiene previous_hash
