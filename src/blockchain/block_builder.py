@@ -44,15 +44,22 @@ class BlockBuilder:
 
         target = "0" * difficulty
 
+        # construimos el contenido a hashear, sin el campo hash
+        content = asdict(self)
+        del content["hash"]
+
         # como vamos a minar el bloque le asignamos a hash una cadena vacia
         # para poder comparar debido a que esta es None en la creacion del
         # builder
-        self.hash = ""
-        while not self.hash.startswith(target):
+        computed_hash = ""
+        while not computed_hash.startswith(target):
             # le sumamos uno al nonce y recalculamos el hash
             self.nonce += 1
+            content["nonce"] = self.nonce
 
-            self.hash = calculate_hash(asdict(self))
+            computed_hash = calculate_hash(content)
+
+        self.hash = computed_hash
 
         # una vez se mina el bloque se procede a crear el mismo inmutable
         return Block(
