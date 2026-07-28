@@ -21,12 +21,6 @@ class BlockBuilder:
     # el timestamp corresponde al momento de creación del bloque
     timestamp: float = field(default_factory=time, init=False)
 
-    # nonce para el minado del bloque
-    nonce: int = field(default=0, init=False)
-
-    # el hash es provisional hasta que el bloque es minado completamente
-    hash: str | None = field(default=None, init=False)
-
     def add_transaction(self, tx: Transaction):
         self.transactions.append(
             tx
@@ -46,7 +40,10 @@ class BlockBuilder:
 
         # construimos el contenido a hashear, sin el campo hash
         content = asdict(self)
-        del content["hash"]
+
+        # nonce para el minado del bloque
+        content["nonce"] = 0
+
 
         # como vamos a minar el bloque le asignamos a hash una cadena vacia
         # para poder comparar debido a que esta es None en la creacion del
@@ -54,19 +51,16 @@ class BlockBuilder:
         computed_hash = ""
         while not computed_hash.startswith(target):
             # le sumamos uno al nonce y recalculamos el hash
-            self.nonce += 1
-            content["nonce"] = self.nonce
+            content["nonce"] += 1
 
             computed_hash = calculate_hash(content)
-
-        self.hash = computed_hash
 
         # una vez se mina el bloque se procede a crear el mismo inmutable
         return Block(
             self.index,
             tuple(self.transactions),
             self.previous_hash,
-            self.nonce,
+            content["nonce"],
             self.timestamp,
-            self.hash,
+            computed_hash,
         )

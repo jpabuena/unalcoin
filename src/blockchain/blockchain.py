@@ -77,7 +77,7 @@ class Blockchain:
         """
 
         # primero verificar que el hash del bloque corresponda a este mismo
-        content = asdict[block]
+        content = asdict(block)
         del content["hash"]
 
         block_hash = calculate_hash(content)
