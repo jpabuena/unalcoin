@@ -3,7 +3,7 @@ from json import dumps
 from typing import Any
 
 
-def calculate_hash(content: dict[str, Any]) -> str:
+def calculate_hash(content: dict[str, Any]):
     """
     Funcion para calcular el hash asociado a los parametros
     """

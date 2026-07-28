@@ -6,28 +6,32 @@ from block_builder import BlockBuilder
 from crypto.hash import calculate_hash
 
 
-@dataclass
+@dataclass(frozen=True)
 class Blockchain:
     """
     Clase que representa la cadena de bloques
     """
 
     difficulty: int
-    chain: list[Block] = field(default=[], init=False)
+    _chain: list[Block] = field(default=[], init=False)
+
+    # queremos proteger la cadena de la maleabilidad directa
+    # para ello exponemos una tupla cuando se quiera referenciar a esta
+    @property
+    def chain(self):
+        return tuple(self._chain)
 
     @property
-    def length(self) -> int:
-        return len(self.chain)
+    def length(self):
+        return len(self._chain)
 
     @property
-    def last_block(self) -> Block | None:
+    def last_block(self):
         """
         El ultimo bloque agregado a la cadena
         """
         if self.length:
-            return self.chain[-1]
-        else:
-            return None
+            return self._chain[-1]
 
     def create_genesis_block(self):
         """
@@ -45,7 +49,7 @@ class Blockchain:
             mined_genesis_block = genesis_block.mine(self.difficulty)
 
             # agregamos el bloque directamente a la cadena
-            self.chain.append(mined_genesis_block)
+            self._chain.append(mined_genesis_block)
         else:
             raise BlockchainError(
                 "Error al crear el bloque genesis", "El bloque genesis ya fue creado"
@@ -54,7 +58,7 @@ class Blockchain:
     def add_block(self, block: Block):
         if self.length:
             if self.verify_block(block):
-                self.chain.append(block)
+                self._chain.append(block)
             else:
                 raise BlockchainError(
                     "Error al agregar el bloque",
@@ -66,7 +70,7 @@ class Blockchain:
                 "No puede agregarse el nuevo bloque ya que no existe el bloque genesis",
             )
 
-    def verify_block(self, block: Block) -> bool:
+    def verify_block(self, block: Block):
         """
         Metodo para verificar si un bloque es realmente valido
         para ser añadido a la cadena.
@@ -89,28 +93,24 @@ class Blockchain:
 
         return True
 
-    # que deberia retornar esto?
-    def verify_chain(self) -> bool:
+    def verify_chain(self):
         """
         Metodo que verifica la integridad de la cadena, esto se refiere a mirar si cada bloque es
         correcto y ademas cumple con la propiedad de estar enlazado criptogrficamente con su bloque previo
         """
         for i in range(self.length - 1, 0, -1):
-            # se debe hacer una verificación de cada bloque, ¿cuando un bloque es correcto?
-            current_block = self.chain[i]
-            previous_block = self.chain[i - 1]
+            current_block = self._chain[i]
+            previous_block = self._chain[i - 1]
 
             # verificar ambos bloques
             if not self.verify_block(current_block) or not self.verify_block(
                 previous_block
             ):
-                # esto puede pasar? xD
-                # deberiamos retornar False o lanzar una excepcion?
                 return False
 
             # verificar si estan enlazados criptograficamente
             if current_block.previous_hash != previous_block.hash:
-                # retornar False o lanzar excepcion?
                 return False
 
         return True
+
