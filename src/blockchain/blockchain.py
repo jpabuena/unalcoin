@@ -42,7 +42,9 @@ class Blockchain:
         if not self.length:
             # crear el builder del bloque y minarlo
             genesis_block = BlockBuilder(
-                0, [], "0",
+                0,
+                [],
+                "0",
             )
 
             # minamos el bloque
@@ -116,4 +118,3 @@ class Blockchain:
                 return False
 
         return True
-

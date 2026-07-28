@@ -44,7 +44,6 @@ class BlockBuilder:
         # nonce para el minado del bloque
         content["nonce"] = 0
 
-
         # como vamos a minar el bloque le asignamos a hash una cadena vacia
         # para poder comparar debido a que esta es None en la creacion del
         # builder

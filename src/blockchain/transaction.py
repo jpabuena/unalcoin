@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
+from json import dumps
 from time import time
 from exceptions import TransactionError
 
@@ -17,10 +18,10 @@ class Transaction:
     amount: float
     nonce: int
 
+    timestamp: float = field(default_factory=time, init=False)
+
     # la firma sera guardada en hexadecimal
     signature: str | None = field(default=None, init=False)
-
-    timestamp: float = field(default_factory=time, init=False)
 
     def __post_init__(self):
         # verificar que el amount sea positivo
@@ -36,8 +37,10 @@ class Transaction:
                 "El emisor debe ser distinto al receptor de la transaccion",
             )
 
-    def sign(self, private_key):
+    def to_bytes(self):
         """
-        Metodo para firmar la transaccion con una clave privada
+        Representacion en bytes de la transaccion
         """
-        pass
+        
+        return dumps(asdict(self), sort_keys=True).encode()
+
