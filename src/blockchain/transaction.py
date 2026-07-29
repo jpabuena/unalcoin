@@ -42,8 +42,10 @@ class Transaction:
         Representacion en bytes de la transaccion
         """
         
-        return dumps(asdict(self), sort_keys=True).encode()
+        content = asdict(self)
+        del content["signature"]
+        return dumps(content, sort_keys=True).encode()
 
 
-    def assign_sign(self, sign: bytes):
+    def assign_sign(self, sign: str):
         object.__setattr__(self, "signature", sign)

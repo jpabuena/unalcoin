@@ -9,7 +9,7 @@ def verify_signature(tx: Transaction, pk: Ed25519PublicKey):
     """
     if tx.signature:
         try:
-            return pk.verify(tx.signature.encode(), tx.to_bytes())
+            pk.verify(bytes.fromhex(tx.signature), tx.to_bytes())
             return True
         except InvalidSignature:
             return False

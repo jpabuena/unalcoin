@@ -29,9 +29,9 @@ class Wallet:
         # primero verificar que la transaccion haya sido creada por
         # esta wallet, solo se pueden firmar transacciones creadas
         # por si misma
-        if tx.recipient == self.sk.private_bytes_raw().hex():
+        if tx.sender == self.pk.public_bytes_raw().hex():
             sign = self.sk.sign(tx.to_bytes())
-            tx.assign_sign(sign)
+            tx.assign_sign(sign.hex())
         else:
             # TODO: lanzar una excepcion
             pass

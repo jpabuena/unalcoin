@@ -17,3 +17,17 @@ Para ejecutar el programa
 ```sh
 uv run main.py
 ```
+
+## Tests
+
+Para añadir tests, crea archivos dentro de `tests/` con nombres como `test_*.py`.
+
+Ejecutar todos los tests:
+```sh
+uv run python -m unittest -v
+```
+
+Ejecutar un archivo de test específico:
+```sh
+uv run python -m unittest -v tests/test_transaction_signature.py
+```
