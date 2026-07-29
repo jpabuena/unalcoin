@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field, asdict
-from transaction import Transaction
-from block import Block
+from .transaction import Transaction
+from .block import Block
 from json import dumps
 from hashlib import sha256
 from time import time

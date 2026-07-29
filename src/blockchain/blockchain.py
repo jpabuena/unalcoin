@@ -1,9 +1,12 @@
 from dataclasses import dataclass, field, asdict
-from block import Block
-from exceptions import BlockchainError
+from .block import Block
+from .transaction import Transaction
+from .exceptions import BlockchainError
 from time import time
-from block_builder import BlockBuilder
+from .block_builder import BlockBuilder
 from crypto.hash import calculate_hash
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from crypto.signature import verify_signature
 
 
 @dataclass(frozen=True)
@@ -13,7 +16,7 @@ class Blockchain:
     """
 
     difficulty: int
-    _chain: list[Block] = field(default=[], init=False)
+    _chain: list[Block] = field(init=False, default_factory=list)
 
     # queremos proteger la cadena de la maleabilidad directa
     # para ello exponemos una tupla cuando se quiera referenciar a esta
@@ -30,49 +33,32 @@ class Blockchain:
         """
         El ultimo bloque agregado a la cadena
         """
-        if self.length:
-            return self._chain[-1]
+        return self._chain[-1]
 
-    def create_genesis_block(self):
-        """
-        Es necesario crear el bloque genesis para empezar
-        a añadir bloques a la cadena, este metodo se encargara
-        de ello
-        """
-        if not self.length:
-            # crear el builder del bloque y minarlo
-            genesis_block = BlockBuilder(
-                0,
-                [],
-                "0",
-            )
+    def __post_init__(self):
+        # crear el builder del bloque y minarlo
+        genesis_block = BlockBuilder(
+            0,
+            [],
+            "0",
+        )
 
-            # minamos el bloque
-            mined_genesis_block = genesis_block.mine(self.difficulty)
+        # minamos el bloque
+        mined_genesis_block = genesis_block.mine(self.difficulty)
 
-            # agregamos el bloque directamente a la cadena
-            self._chain.append(mined_genesis_block)
-        else:
-            raise BlockchainError(
-                "Error al crear el bloque genesis", "El bloque genesis ya fue creado"
-            )
+        # agregamos el bloque directamente a la cadena
+        self._chain.append(mined_genesis_block)
 
     def add_block(self, block: Block):
-        if self.length:
-            if self.verify_block(block):
-                self._chain.append(block)
-            else:
-                raise BlockchainError(
-                    "Error al agregar el bloque",
-                    "El bloque es invalido y no puede ser agregado a la cadena",
-                )
+        if self.validate_block(block) and self.validate_transactions_lot(block):
+            self._chain.append(block)
         else:
             raise BlockchainError(
                 "Error al agregar el bloque",
-                "No puede agregarse el nuevo bloque ya que no existe el bloque genesis",
+                "El bloque es invalido y no puede ser agregado a la cadena",
             )
 
-    def verify_block(self, block: Block):
+    def validate_block(self, block: Block):
         """
         Metodo para verificar si un bloque es realmente valido
         para ser añadido a la cadena.
@@ -108,7 +94,7 @@ class Blockchain:
             previous_block = self._chain[i - 1]
 
             # verificar ambos bloques
-            if not self.verify_block(current_block) or not self.verify_block(
+            if not self.validate_block(current_block) or not self.validate_block(
                 previous_block
             ):
                 return False
@@ -116,5 +102,65 @@ class Blockchain:
             # verificar si estan enlazados criptograficamente
             if current_block.previous_hash != previous_block.hash:
                 return False
+
+        return True
+
+    def get_balance(self, address: str):
+        """
+        Metodo para obtener el balance de una persona (direccion) en la cadena
+        """
+        balance = 0.0
+
+        for block in self.chain:
+            for tx in block.transactions:
+                if tx.recipient == address:
+                    balance += tx.amount
+                if tx.sender == address:
+                    balance -= tx.amount
+
+        return balance
+
+    def validate_transaction(self, tx: Transaction):
+        if tx.amount <= 0:
+            return False
+        if tx.sender == tx.recipient:
+            return False
+        if not tx.signature:
+            return False
+
+        # verifiquemos la firma de la transaccion
+        # recuperamos primero su pk
+        try:
+            sender_pk = Ed25519PublicKey.from_public_bytes(bytes.fromhex(tx.sender))
+        except ValueError:
+            return False
+
+        # validamos
+        if not verify_signature(tx, sender_pk):
+            return False
+
+        return True
+
+    def validate_transactions_lot(self, block: Block):
+        """
+        Metodo para validar si el lote de transacciones del bloque es correcto
+        y no existen transacciones invalidas o con fondos insuficientes
+        """
+
+        # cuentas pendientes
+        pending_spend = {}
+
+        for tx in block.transactions:
+            # validar la transaccion
+            if not self.validate_transaction(tx):
+                return False
+
+            available = self.get_balance(tx.sender) - pending_spend.get(tx.sender, 0.0)
+
+            # rechazar si no cuenta con fondos o existe doble gasto
+            if tx.amount > available:
+                return False
+            
+            pending_spend[tx.sender] = pending_spend.get(tx.sender, 0.0) + tx.amount
 
         return True

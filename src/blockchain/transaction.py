@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass, field
 from json import dumps
 from time import time
-from exceptions import TransactionError
+from .exceptions import TransactionError
 
 
 @dataclass(frozen=True)

@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field, asdict
 from json import dumps
 from hashlib import sha256
-from transaction import Transaction
+from .transaction import Transaction
 
 
 @dataclass(frozen=True)
