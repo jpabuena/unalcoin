@@ -27,11 +27,13 @@ class Wallet:
         """
 
         # primero verificar que la transaccion haya sido creada por
-        # esta wallet
+        # esta wallet, solo se pueden firmar transacciones creadas
+        # por si misma
         if tx.recipient == self.sk.private_bytes_raw().hex():
-            self.sk.sign(tx.to_bytes())
+            sign = self.sk.sign(tx.to_bytes())
+            tx.assign_sign(sign)
         else:
-            # TODO: lanzar una execpcion
+            # TODO: lanzar una excepcion
             pass
 
     def create_transaction(self, recipient: str, amount: float):

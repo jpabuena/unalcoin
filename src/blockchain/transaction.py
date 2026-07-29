@@ -44,3 +44,6 @@ class Transaction:
         
         return dumps(asdict(self), sort_keys=True).encode()
 
+
+    def assign_sign(self, sign: bytes):
+        object.__setattr__(self, "signature", sign)
