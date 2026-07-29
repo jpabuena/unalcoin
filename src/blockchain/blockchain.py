@@ -50,7 +50,9 @@ class Blockchain:
         self._chain.append(mined_genesis_block)
 
     def add_block(self, block: Block):
-        if self.validate_block(block) and self.validate_transactions_lot(block):
+        if self.validate_block(block, self.last_block) and self.validate_transactions_lot(
+            block
+        ):
             self._chain.append(block)
         else:
             raise BlockchainError(
@@ -58,7 +60,7 @@ class Blockchain:
                 "El bloque es invalido y no puede ser agregado a la cadena",
             )
 
-    def validate_block(self, block: Block):
+    def validate_block(self, block: Block, previous_block: Block | None = None):
         """
         Metodo para verificar si un bloque es realmente valido
         para ser añadido a la cadena.
@@ -76,11 +78,19 @@ class Blockchain:
         if not block_hash.startswith("0" * self.difficulty):
             return False
 
-        # validar la integridad del bloque respecto a la cadena, es decir respecto a su bloque
-        # anterior, solo verificamos para los nuevos bloques, el bloque genesis no tiene previous_hash
-        if self.last_block and self.length > 1:
-            if self.last_block.hash != block.previous_hash:
-                return False
+        # reglas del bloque genesis
+        if block.index == 0:
+            return block.previous_hash == "0"
+
+        # para bloques no genesis debe existir un bloque previo esperado
+        if previous_block is None:
+            previous_block = self.last_block
+
+        if block.previous_hash != previous_block.hash:
+            return False
+
+        if block.index != previous_block.index + 1:
+            return False
 
         return True
 
@@ -89,18 +99,17 @@ class Blockchain:
         Metodo que verifica la integridad de la cadena, esto se refiere a mirar si cada bloque es
         correcto y ademas cumple con la propiedad de estar enlazado criptogrficamente con su bloque previo
         """
-        for i in range(self.length - 1, 0, -1):
+        if self.length == 0:
+            return False
+
+        # validar bloque genesis
+        if not self.validate_block(self._chain[0]):
+            return False
+
+        for i in range(1, self.length):
             current_block = self._chain[i]
             previous_block = self._chain[i - 1]
-
-            # verificar ambos bloques
-            if not self.validate_block(current_block) or not self.validate_block(
-                previous_block
-            ):
-                return False
-
-            # verificar si estan enlazados criptograficamente
-            if current_block.previous_hash != previous_block.hash:
+            if not self.validate_block(current_block, previous_block):
                 return False
 
         return True
