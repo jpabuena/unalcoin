@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from json import dumps
 from typing import Any
 
+
 def get_timestamp():
     return datetime.now(timezone.utc)
 

@@ -50,9 +50,9 @@ class Blockchain:
         self._chain.append(mined_genesis_block)
 
     def add_block(self, block: Block):
-        if self.validate_block(block, self.last_block) and self.validate_transactions_lot(
-            block
-        ):
+        if self.validate_block(
+            block, self.last_block
+        ) and self.validate_transactions_lot(block):
             self._chain.append(block)
         else:
             raise BlockchainError(
@@ -129,6 +129,14 @@ class Blockchain:
 
         return balance
 
+    def get_last_transactions_nonce(self, address: str):
+        last = -1
+        for block in self.chain:
+            for tx in block.transactions:
+                if tx.sender == address and tx.nonce > last:
+                        last = tx.nonce
+        return last
+
     def validate_transaction(self, tx: Transaction):
         if tx.amount <= 0:
             return False
@@ -158,18 +166,28 @@ class Blockchain:
 
         # cuentas pendientes
         pending_spend = {}
+        # nonce siguiente
+        pending_next_nonce = {}
 
         for tx in block.transactions:
             # validar la transaccion
             if not self.validate_transaction(tx):
                 return False
 
+            last_nonce = self.get_last_transactions_nonce(tx.sender)
+            expected_nonce = pending_next_nonce.get(tx.sender, last_nonce + 1)
+
+            # si el nonce no es el que deberia ser el lote es invalido
+            if tx.nonce != expected_nonce:
+                return False
+            pending_next_nonce[tx.sender] = pending_next_nonce.get(tx.sender, 0.0) + expected_nonce + 1
+
             available = self.get_balance(tx.sender) - pending_spend.get(tx.sender, 0.0)
 
             # rechazar si no cuenta con fondos o existe doble gasto
             if tx.amount > available:
                 return False
-            
+
             pending_spend[tx.sender] = pending_spend.get(tx.sender, 0.0) + tx.amount
 
         return True

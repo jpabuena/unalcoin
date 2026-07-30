@@ -1,7 +1,11 @@
 from dataclasses import asdict, dataclass, field
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+    Ed25519PrivateKey,
+    Ed25519PublicKey,
+)
 from blockchain.transaction import Transaction
 from crypto.keys import generate_pair_key
+from .exceptions import WalletError
 
 
 @dataclass(frozen=True)
@@ -13,9 +17,13 @@ class Wallet:
 
     sk: Ed25519PrivateKey = field(init=False)
     pk: Ed25519PublicKey = field(init=False)
+    nonce: int = 0
 
     def __post_init__(self):
-        sk, pk, = generate_pair_key()
+        (
+            sk,
+            pk,
+        ) = generate_pair_key()
 
         object.__setattr__(self, "sk", sk)
         object.__setattr__(self, "pk", pk)
@@ -33,8 +41,7 @@ class Wallet:
             sign = self.sk.sign(tx.to_bytes())
             tx.assign_sign(sign.hex())
         else:
-            # TODO: lanzar una excepcion
-            pass
+            raise WalletError("Error al firmar la transaccion", "Esta transaccion no ha sido creada por esta wallet")
 
     def create_transaction(self, recipient: str, amount: float):
         """
@@ -44,11 +51,14 @@ class Wallet:
 
         # verificar los datos
         if not recipient:
-            # TODO: lanzar una excepcion
-            pass
-       
-        if amount <= 0:
-            # TODO: lanzar una excepcion
-            pass
+            raise WalletError("Error al crear la transaccion", "Transaccion incompleta: falta el receptor")
 
-        return Transaction(self.pk.public_bytes_raw().hex(), recipient, amount, 0) # TODO: como vamos a manejar el nonce?
+        if amount <= 0:
+            raise WalletError("Error al crear la transaccion", "Transaccion no valida: la cantidad de la transaccion debe ser positiva")
+
+        tx = Transaction(
+            self.pk.public_bytes_raw().hex(), recipient, amount, self.nonce
+        )
+        object.__setattr__(self, "nonce", self.nonce + 1)
+
+        return tx

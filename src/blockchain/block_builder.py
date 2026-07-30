@@ -38,14 +38,18 @@ class BlockBuilder:
             try:
                 pk.verify(bytes.fromhex(tx.signature), tx.to_bytes())
             except InvalidSignature:
-                raise BlockchainError("Error al añadir la transaccion", "La firma de la transaccion es invalida")
+                raise BlockchainError(
+                    "Error al añadir la transaccion",
+                    "La firma de la transaccion es invalida",
+                )
         else:
-            raise BlockchainError("Error al añadir la transaccion", "La transaccion no se encuentra firmada")
+            raise BlockchainError(
+                "Error al añadir la transaccion",
+                "La transaccion no se encuentra firmada",
+            )
 
         # todo ok
-        self.transactions.append(
-            tx
-        )
+        self.transactions.append(tx)
 
     def mine(self, difficulty: int):
         """

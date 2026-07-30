@@ -43,12 +43,11 @@ class Transaction:
         """
         Representacion en bytes de la transaccion
         """
-        
+
         data = asdict(self)
         del data["signature"]
 
         return serialize(data).encode()
-
 
     def assign_sign(self, sign: str):
         object.__setattr__(self, "signature", sign)
