@@ -18,14 +18,12 @@ class ChainIntegrityTests(unittest.TestCase):
 
         block_1 = BlockBuilder(
             index=chain.length,
-            transactions=[],
             previous_hash=chain.last_block.hash,
         ).mine(chain.difficulty)
         chain.add_block(block_1)
 
         block_2 = BlockBuilder(
             index=chain.length,
-            transactions=[],
             previous_hash=chain.last_block.hash,
         ).mine(chain.difficulty)
         chain.add_block(block_2)
@@ -37,7 +35,6 @@ class ChainIntegrityTests(unittest.TestCase):
 
         invalid_block = BlockBuilder(
             index=chain.length,
-            transactions=[],
             previous_hash="hash_invalido",
         ).mine(chain.difficulty)
 
@@ -49,7 +46,6 @@ class ChainIntegrityTests(unittest.TestCase):
 
         invalid_block = BlockBuilder(
             index=chain.length + 1,
-            transactions=[],
             previous_hash=chain.last_block.hash,
         ).mine(chain.difficulty)
 
@@ -61,14 +57,12 @@ class ChainIntegrityTests(unittest.TestCase):
 
         block_1 = BlockBuilder(
             index=chain.length,
-            transactions=[],
             previous_hash=chain.last_block.hash,
         ).mine(chain.difficulty)
         chain.add_block(block_1)
 
         block_2 = BlockBuilder(
             index=chain.length,
-            transactions=[],
             previous_hash=chain.last_block.hash,
         ).mine(chain.difficulty)
         chain.add_block(block_2)

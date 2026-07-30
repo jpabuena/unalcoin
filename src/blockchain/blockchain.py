@@ -39,7 +39,6 @@ class Blockchain:
         # crear el builder del bloque y minarlo
         genesis_block = BlockBuilder(
             0,
-            [],
             "0",
         )
 
@@ -180,7 +179,7 @@ class Blockchain:
             # si el nonce no es el que deberia ser el lote es invalido
             if tx.nonce != expected_nonce:
                 return False
-            pending_next_nonce[tx.sender] = pending_next_nonce.get(tx.sender, 0.0) + expected_nonce + 1
+            pending_next_nonce[tx.sender] = expected_nonce + 1
 
             available = self.get_balance(tx.sender) - pending_spend.get(tx.sender, 0.0)
 

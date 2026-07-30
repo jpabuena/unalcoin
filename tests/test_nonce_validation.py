@@ -40,11 +40,13 @@ class NonceValidationTests(unittest.TestCase):
         return tx
 
     def _mine_candidate(self, txs: list[Transaction]):
-        return BlockBuilder(
+        builder = BlockBuilder(
             index=self.chain.length,
-            transactions=txs,
             previous_hash=self.chain.last_block.hash,
-        ).mine(self.chain.difficulty)
+        )
+        for tx in txs:
+            builder.add_transaction(tx)
+        return builder.mine(self.chain.difficulty)
 
     def test_accepts_sequential_nonces_in_same_block(self):
         tx0 = self._signed_tx(0, 2.0)

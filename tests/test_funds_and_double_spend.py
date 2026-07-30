@@ -35,11 +35,12 @@ class FundsAndDoubleSpendTests(unittest.TestCase):
         tx = self.alice.create_transaction(self.bob.pk.public_bytes_raw().hex(), 15.0)
         self.alice.sign(tx)
 
-        candidate = BlockBuilder(
+        builder = BlockBuilder(
             index=self.chain.length,
-            transactions=[tx],
             previous_hash=self.chain.last_block.hash,
-        ).mine(self.chain.difficulty)
+        )
+        builder.add_transaction(tx)
+        candidate = builder.mine(self.chain.difficulty)
 
         self.assertFalse(self.chain.validate_transactions_lot(candidate))
 
@@ -49,11 +50,13 @@ class FundsAndDoubleSpendTests(unittest.TestCase):
         self.alice.sign(tx1)
         self.alice.sign(tx2)
 
-        candidate = BlockBuilder(
+        builder = BlockBuilder(
             index=self.chain.length,
-            transactions=[tx1, tx2],
             previous_hash=self.chain.last_block.hash,
-        ).mine(self.chain.difficulty)
+        )
+        builder.add_transaction(tx1)
+        builder.add_transaction(tx2)
+        candidate = builder.mine(self.chain.difficulty)
 
         self.assertFalse(self.chain.validate_transactions_lot(candidate))
 
@@ -61,11 +64,12 @@ class FundsAndDoubleSpendTests(unittest.TestCase):
         tx = self.alice.create_transaction(self.bob.pk.public_bytes_raw().hex(), 15.0)
         self.alice.sign(tx)
 
-        candidate = BlockBuilder(
+        builder = BlockBuilder(
             index=self.chain.length,
-            transactions=[tx],
             previous_hash=self.chain.last_block.hash,
-        ).mine(self.chain.difficulty)
+        )
+        builder.add_transaction(tx)
+        candidate = builder.mine(self.chain.difficulty)
 
         with self.assertRaises(BlockchainError):
             self.chain.add_block(candidate)
@@ -76,11 +80,13 @@ class FundsAndDoubleSpendTests(unittest.TestCase):
         self.alice.sign(tx1)
         self.alice.sign(tx2)
 
-        candidate = BlockBuilder(
+        builder = BlockBuilder(
             index=self.chain.length,
-            transactions=[tx1, tx2],
             previous_hash=self.chain.last_block.hash,
-        ).mine(self.chain.difficulty)
+        )
+        builder.add_transaction(tx1)
+        builder.add_transaction(tx2)
+        candidate = builder.mine(self.chain.difficulty)
 
         self.assertTrue(self.chain.validate_transactions_lot(candidate))
         self.chain.add_block(candidate)

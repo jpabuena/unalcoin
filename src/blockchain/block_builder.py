@@ -1,14 +1,10 @@
 from dataclasses import dataclass, field, asdict
-
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-from cryptography.exceptions import InvalidSignature
-
-from blockchain.exceptions import BlockchainError
+from crypto.signature import verify_signature
+from blockchain.exceptions import BlockBuilderError
 from .utils import get_timestamp
 from .transaction import Transaction
 from .block import Block
-from json import dumps
-from hashlib import sha256
 from datetime import datetime
 from crypto.hash import calculate_hash
 
@@ -21,32 +17,36 @@ class BlockBuilder:
     """
 
     index: int
-    transactions: list[Transaction]
     previous_hash: str
+    transactions: list[Transaction] = field(init=False, default_factory=list)
 
     # el timestamp corresponde al momento de creación del bloque
     timestamp: datetime = field(default_factory=get_timestamp, init=False)
 
-    def add_transaction(self, tx: Transaction):
+    def _validate_transaction(self, tx: Transaction):
         # recuperar la clave publica del sender
         try:
             pk = Ed25519PublicKey.from_public_bytes(bytes.fromhex(tx.sender))
         except ValueError:
-            raise ValueError()
+            raise BlockBuilderError(
+                "Error al validar la transaccion",
+                "El emisor no tiene una clave publica valida",
+            )
 
-        if tx.signature:
-            try:
-                pk.verify(bytes.fromhex(tx.signature), tx.to_bytes())
-            except InvalidSignature:
-                raise BlockchainError(
-                    "Error al añadir la transaccion",
-                    "La firma de la transaccion es invalida",
-                )
-        else:
-            raise BlockchainError(
+        if not tx.signature:
+            raise BlockBuilderError(
                 "Error al añadir la transaccion",
                 "La transaccion no se encuentra firmada",
             )
+
+        if not verify_signature(tx, pk):
+            raise BlockBuilderError(
+                "Error al añadir la transaccion",
+                "La firma de la transaccion es invalida",
+            )
+
+    def add_transaction(self, tx: Transaction):
+        self._validate_transaction(tx)
 
         # todo ok
         self.transactions.append(tx)
@@ -60,6 +60,9 @@ class BlockBuilder:
         es 4 el nonce que "mina" el bloque es aquel que produce un hash de la
         forma "0000...".
         """
+        # defensa final: validar de nuevo todo el lote antes de minar
+        for tx in self.transactions:
+            self._validate_transaction(tx)
 
         target = "0" * difficulty
 

@@ -15,4 +15,4 @@ def verify_signature(tx: Transaction, pk: Ed25519PublicKey):
         except InvalidSignature:
             return False
     else:
-        pass  # TODO: lanzar una excepcion
+        return False
