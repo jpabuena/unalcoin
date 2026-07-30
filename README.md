@@ -24,7 +24,7 @@ Para añadir tests, crea archivos dentro de `tests/` con nombres como `test_*.py
 
 Ejecutar todos los tests:
 ```sh
-uv run python -m unittest -v
+uv run python -m unittest discover -s tests -v
 ```
 
 Ejecutar un archivo de test específico:
