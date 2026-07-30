@@ -1,9 +1,15 @@
 from dataclasses import dataclass, field, asdict
+
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from cryptography.exceptions import InvalidSignature
+
+from blockchain.exceptions import BlockchainError
+from .utils import get_timestamp
 from .transaction import Transaction
 from .block import Block
 from json import dumps
 from hashlib import sha256
-from time import time
+from datetime import datetime
 from crypto.hash import calculate_hash
 
 
@@ -19,12 +25,27 @@ class BlockBuilder:
     previous_hash: str
 
     # el timestamp corresponde al momento de creación del bloque
-    timestamp: float = field(default_factory=time, init=False)
+    timestamp: datetime = field(default_factory=get_timestamp, init=False)
 
     def add_transaction(self, tx: Transaction):
+        # recuperar la clave publica del sender
+        try:
+            pk = Ed25519PublicKey.from_public_bytes(bytes.fromhex(tx.sender))
+        except ValueError:
+            raise ValueError()
+
+        if tx.signature:
+            try:
+                pk.verify(bytes.fromhex(tx.signature), tx.to_bytes())
+            except InvalidSignature:
+                raise BlockchainError("Error al añadir la transaccion", "La firma de la transaccion es invalida")
+        else:
+            raise BlockchainError("Error al añadir la transaccion", "La transaccion no se encuentra firmada")
+
+        # todo ok
         self.transactions.append(
             tx
-        )  # TODO: validar la firma antes de agregar la transaccion
+        )
 
     def mine(self, difficulty: int):
         """
@@ -39,27 +60,24 @@ class BlockBuilder:
         target = "0" * difficulty
 
         # construimos el contenido a hashear, sin el campo hash
-        content = asdict(self)
+        data = asdict(self)
 
         # nonce para el minado del bloque
-        content["nonce"] = 0
+        data["nonce"] = 0
 
-        # como vamos a minar el bloque le asignamos a hash una cadena vacia
-        # para poder comparar debido a que esta es None en la creacion del
-        # builder
-        computed_hash = ""
+        computed_hash = calculate_hash(data)
         while not computed_hash.startswith(target):
             # le sumamos uno al nonce y recalculamos el hash
-            content["nonce"] += 1
+            data["nonce"] += 1
 
-            computed_hash = calculate_hash(content)
+            computed_hash = calculate_hash(data)
 
         # una vez se mina el bloque se procede a crear el mismo inmutable
         return Block(
             self.index,
             tuple(self.transactions),
             self.previous_hash,
-            content["nonce"],
+            data["nonce"],
             self.timestamp,
             computed_hash,
         )

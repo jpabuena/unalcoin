@@ -1,7 +1,9 @@
 from dataclasses import asdict, dataclass, field
 from json import dumps
-from time import time
+from datetime import datetime
+from time import timezone
 from .exceptions import TransactionError
+from .utils import get_timestamp, serialize
 
 
 @dataclass(frozen=True)
@@ -18,7 +20,7 @@ class Transaction:
     amount: float
     nonce: int
 
-    timestamp: float = field(default_factory=time, init=False)
+    timestamp: datetime = field(default_factory=get_timestamp, init=False)
 
     # la firma sera guardada en hexadecimal
     signature: str | None = field(default=None, init=False)
@@ -42,9 +44,10 @@ class Transaction:
         Representacion en bytes de la transaccion
         """
         
-        content = asdict(self)
-        del content["signature"]
-        return dumps(content, sort_keys=True).encode()
+        data = asdict(self)
+        del data["signature"]
+
+        return serialize(data).encode()
 
 
     def assign_sign(self, sign: str):

@@ -20,3 +20,8 @@ class TransactionError(Error):
 @dataclass
 class BlockchainError(Error):
     pass
+
+
+@dataclass
+class BlockBuilderError(Error):
+    pass

@@ -67,10 +67,10 @@ class Blockchain:
         """
 
         # primero verificar que el hash del bloque corresponda a este mismo
-        content = asdict(block)
-        del content["hash"]
+        data = asdict(block)
+        del data["hash"]
 
-        block_hash = calculate_hash(content)
+        block_hash = calculate_hash(data)
         if block_hash != block.hash:
             return False
 
