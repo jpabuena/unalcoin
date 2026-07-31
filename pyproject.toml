@@ -10,6 +10,7 @@ dependencies = [
 
 [project.scripts]
 unalcoin = "unalcoin.main:main"
+unalcoin-cli = "unalcoin.cli:main"
 
 [tool.uv]
 package = true
