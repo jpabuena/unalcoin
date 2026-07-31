@@ -3,11 +3,10 @@ from .block import Block
 from .transaction import Transaction
 from .coinbase import CoinbaseTransaction
 from .exceptions import BlockchainError
-from time import time
 from .block_builder import BlockBuilder
-from crypto.hash import calculate_hash
+from ..crypto.hash import calculate_hash
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-from crypto.signature import verify_signature
+from ..crypto.signature import verify_signature
 
 
 @dataclass(frozen=True)

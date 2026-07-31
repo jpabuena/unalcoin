@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from hashlib import sha256
 from json import dumps
 from typing import Any
-from blockchain.utils import serialize
+from ..blockchain.utils import serialize
 
 
 def calculate_hash(data: dict[str, Any]):

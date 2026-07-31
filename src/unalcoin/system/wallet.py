@@ -3,8 +3,8 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
     Ed25519PrivateKey,
     Ed25519PublicKey,
 )
-from blockchain.transaction import Transaction
-from crypto.keys import generate_pair_key
+from ..blockchain.transaction import Transaction
+from ..crypto.keys import generate_pair_key
 from .exceptions import WalletError
 
 

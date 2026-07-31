@@ -7,17 +7,17 @@ from dataclasses import asdict
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT / "src"))
+#ROOT = Path(__file__).resolve().parent
+#sys.path.insert(0, str(ROOT / "src"))
 
-from blockchain.blockchain import Blockchain
-from blockchain.block_builder import BlockBuilder
-from blockchain.block import Block
-from blockchain.coinbase import CoinbaseTransaction
-from blockchain.transaction import Transaction
-from crypto.hash import calculate_hash
-from crypto.signature import verify_signature
-from system.wallet import Wallet
+from .blockchain.blockchain import Blockchain
+from .blockchain.block_builder import BlockBuilder
+from .blockchain.block import Block
+from .blockchain.coinbase import CoinbaseTransaction
+from .blockchain.transaction import Transaction
+from .crypto.hash import calculate_hash
+from .crypto.signature import verify_signature
+from .system.wallet import Wallet
 
 
 def main():

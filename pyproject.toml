@@ -1,9 +1,15 @@
 [project]
-name = "blockchain"
+name = "unalcoin"
 version = "0.1.0"
-description = "Implementación básica de blockchain para fines académicos"
+description = "Implementación básica de una criptomoneda para fines académicos"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "cryptography>=49.0.0",
 ]
+
+[project.scripts]
+unalcoin = "unalcoin.main:main"
+
+[tool.uv]
+package = true

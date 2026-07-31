@@ -1,13 +1,13 @@
 from dataclasses import dataclass, field, asdict
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-from crypto.signature import verify_signature
-from blockchain.exceptions import BlockBuilderError
+from ..crypto.signature import verify_signature
+from .exceptions import BlockBuilderError
 from .coinbase import CoinbaseTransaction
 from .utils import get_timestamp
 from .transaction import Transaction
 from .block import Block
 from datetime import datetime
-from crypto.hash import calculate_hash
+from ..crypto.hash import calculate_hash
 
 
 @dataclass
