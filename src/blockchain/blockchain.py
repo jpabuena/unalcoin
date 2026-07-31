@@ -138,6 +138,9 @@ class Blockchain:
         last = -1
         for block in self.chain:
             for tx in block.transactions:
+                # la coinbase no se toma en cuenta
+                if isinstance(tx, CoinbaseTransaction):
+                    continue
                 if tx.sender == address and tx.nonce > last:
                         last = tx.nonce
         return last
