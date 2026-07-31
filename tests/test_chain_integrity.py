@@ -7,9 +7,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.append(str(ROOT / "src" / "blockchain"))
 
-from blockchain.blockchain import Blockchain
-from blockchain.block_builder import BlockBuilder
-from blockchain.exceptions import BlockchainError
+from unalcoin.blockchain.blockchain import Blockchain
+from unalcoin.blockchain.block_builder import BlockBuilder
+from unalcoin.blockchain.exceptions import BlockchainError
 
 
 class ChainIntegrityTests(unittest.TestCase):

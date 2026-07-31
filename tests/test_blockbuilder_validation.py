@@ -7,9 +7,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.append(str(ROOT / "src" / "blockchain"))
 
-from blockchain.block_builder import BlockBuilder
-from blockchain.exceptions import BlockBuilderError
-from system.wallet import Wallet
+from unalcoin.blockchain.block_builder import BlockBuilder
+from unalcoin.blockchain.exceptions import BlockBuilderError
+from unalcoin.system.wallet import Wallet
 
 
 class BlockBuilderValidationTests(unittest.TestCase):

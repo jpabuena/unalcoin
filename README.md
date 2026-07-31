@@ -24,22 +24,23 @@ Para añadir tests, crea archivos dentro de `tests/` con nombres como `test_*.py
 
 Ejecutar todos los tests:
 ```sh
-uv run python -m unittest discover -s tests -v
+uv run pytest
 ```
 
 Ejecutar un archivo de test específico:
 ```sh
-uv run python -m unittest -v tests/test_transaction_signature.py
+uv run python -m unittest -v tests/test_**.py
 ```
 
 ## main
 
-Para ejecutar el main que contiene una implementación estatica del criptosistema es necesario sincronizar el proyecto:
-```sh
-uv sync
-```
-
-y ejecutar:
+Para ejecutar la implementación estatica de unalcoin
 ```sh
 uv run unalcoin
 ```
+
+Para interactuar con unalcoin mediante una cli
+```sh
+uv run unalcoin-cli
+```
+

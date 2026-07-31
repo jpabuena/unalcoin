@@ -8,10 +8,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.append(str(ROOT / "src" / "blockchain"))
 
-from blockchain.blockchain import Blockchain
-from blockchain.block_builder import BlockBuilder
-from blockchain.exceptions import BlockchainError
-from system.wallet import Wallet
+from unalcoin.blockchain.blockchain import Blockchain
+from unalcoin.blockchain.block_builder import BlockBuilder
+from unalcoin.blockchain.exceptions import BlockchainError
+from unalcoin.system.wallet import Wallet
 
 
 class FundsAndDoubleSpendTests(unittest.TestCase):

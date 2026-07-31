@@ -7,8 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.append(str(ROOT / "src" / "blockchain"))
 
-from crypto.signature import verify_signature
-from system.wallet import Wallet
+from unalcoin.crypto.signature import verify_signature
+from unalcoin.system.wallet import Wallet
 
 
 class TransactionSignatureTests(unittest.TestCase):
