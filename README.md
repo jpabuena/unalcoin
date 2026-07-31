@@ -31,3 +31,15 @@ Ejecutar un archivo de test específico:
 ```sh
 uv run python -m unittest -v tests/test_transaction_signature.py
 ```
+
+## main
+
+Para ejecutar el main que contiene una implementación estatica del criptosistema es necesario sincronizar el proyecto:
+```sh
+uv sync
+```
+
+y ejecutar:
+```sh
+uv run unalcoin
+```
