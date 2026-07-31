@@ -3,6 +3,7 @@ from datetime import datetime
 from json import dumps
 from hashlib import sha256
 from .transaction import Transaction
+from .coinbase import CoinbaseTransaction
 
 
 @dataclass(frozen=True)
@@ -12,7 +13,7 @@ class Block:
     """
 
     index: int
-    transactions: tuple[Transaction, ...]
+    transactions: tuple[Transaction | CoinbaseTransaction, ...]
     previous_hash: str
     nonce: int
     timestamp: datetime

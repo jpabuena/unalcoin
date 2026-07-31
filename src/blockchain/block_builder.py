@@ -2,6 +2,7 @@ from dataclasses import dataclass, field, asdict
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from crypto.signature import verify_signature
 from blockchain.exceptions import BlockBuilderError
+from .coinbase import CoinbaseTransaction
 from .utils import get_timestamp
 from .transaction import Transaction
 from .block import Block
@@ -18,12 +19,24 @@ class BlockBuilder:
 
     index: int
     previous_hash: str
-    transactions: list[Transaction] = field(init=False, default_factory=list)
+    transactions: list[Transaction | CoinbaseTransaction] = field(init=False, default_factory=list)
 
     # el timestamp corresponde al momento de creación del bloque
     timestamp: datetime = field(default_factory=get_timestamp, init=False)
 
-    def _validate_transaction(self, tx: Transaction):
+    def set_coinbase(self, recipient: str, amount: float):
+        """
+        Establece la transacción coinbase del bloque (recompensa al minero).
+        Siempre se inserta en la primera posición.
+        """
+        coinbase = CoinbaseTransaction(recipient=recipient, amount=amount)
+        self.transactions.insert(0, coinbase)
+
+    def _validate_transaction(self, tx: Transaction | CoinbaseTransaction):
+        # las transacciones coinbase no requieren firma
+        if isinstance(tx, CoinbaseTransaction):
+            return
+
         # recuperar la clave publica del sender
         try:
             pk = Ed25519PublicKey.from_public_bytes(bytes.fromhex(tx.sender))

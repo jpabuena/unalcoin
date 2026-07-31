@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field, asdict
 from .block import Block
 from .transaction import Transaction
+from .coinbase import CoinbaseTransaction
 from .exceptions import BlockchainError
 from time import time
 from .block_builder import BlockBuilder
@@ -16,6 +17,7 @@ class Blockchain:
     """
 
     difficulty: int
+    mining_reward: float = 50.0
     _chain: list[Block] = field(init=False, default_factory=list)
 
     # queremos proteger la cadena de la maleabilidad directa
@@ -121,10 +123,14 @@ class Blockchain:
 
         for block in self.chain:
             for tx in block.transactions:
-                if tx.recipient == address:
-                    balance += tx.amount
-                if tx.sender == address:
-                    balance -= tx.amount
+                if isinstance(tx, CoinbaseTransaction):
+                    if tx.recipient == address:
+                        balance += tx.amount
+                else:
+                    if tx.recipient == address:
+                        balance += tx.amount
+                    if tx.sender == address:
+                        balance -= tx.amount
 
         return balance
 
@@ -136,7 +142,10 @@ class Blockchain:
                         last = tx.nonce
         return last
 
-    def validate_transaction(self, tx: Transaction):
+    def validate_transaction(self, tx: Transaction | CoinbaseTransaction):
+        if isinstance(tx, CoinbaseTransaction):
+            return tx.amount > 0
+
         if tx.amount <= 0:
             return False
         if tx.sender == tx.recipient:
@@ -168,7 +177,15 @@ class Blockchain:
         # nonce siguiente
         pending_next_nonce = {}
 
-        for tx in block.transactions:
+        for i, tx in enumerate(block.transactions):
+            # coinbase: debe ser la primera transaccion y el monto debe ser el reward
+            if isinstance(tx, CoinbaseTransaction):
+                if i != 0:
+                    return False
+                if tx.amount != self.mining_reward:
+                    return False
+                continue
+
             # validar la transaccion
             if not self.validate_transaction(tx):
                 return False
