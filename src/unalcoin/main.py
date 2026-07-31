@@ -4,12 +4,6 @@ import time
 from hashlib import sha256
 from json import dumps
 from dataclasses import asdict
-
-sys.stdout.reconfigure(encoding='utf-8')
-
-#ROOT = Path(__file__).resolve().parent
-#sys.path.insert(0, str(ROOT / "src"))
-
 from .blockchain.blockchain import Blockchain
 from .blockchain.block_builder import BlockBuilder
 from .blockchain.block import Block
@@ -100,7 +94,7 @@ def main():
     tx_alice_bob = alice.create_transaction(bob_addr, 20.0)
     alice.sign(tx_alice_bob)
     valid = verify_signature(tx_alice_bob, alice.pk)
-    print(f"Firma generada:  {tx_alice_bob.signature[:48]}...")
+    print(f"Firma generada:  {tx_alice_bob.signature[:48]}...") # tx ya firmada
     print(f"Verificación con pk de Alice: {'VÁLIDA' if valid else 'INVÁLIDA'}")
 
     # 3b. Intento de forja (Eve firma con su propia clave)
@@ -120,7 +114,7 @@ def main():
     print("\n3c. Manipulación del mensaje: Eve modifica el monto de una tx firmada")
     demo_tx = Transaction(alice_addr, bob_addr, 20.0, 99)
     demo_tx.assign_sign(alice.sk.sign(demo_tx.to_bytes()).hex())
-    print(f"  Firma original sobre monto=20:  {demo_tx.signature[:48]}...")
+    print(f"  Firma original sobre monto=20:  {demo_tx.signature[:48]}...") # tx ya firmada
     object.__setattr__(demo_tx, "amount", 200.0)
     tampered_valid = verify_signature(demo_tx, alice.pk)
     if not tampered_valid:
